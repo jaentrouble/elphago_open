@@ -135,7 +135,6 @@ __device__ int get_adv_idx(
     // 8: targettype
     // 9: full_pos (not used, only for checking) (possible when full, impossible when disabled)
     // 10: full_neg (not used, only for checking) (impossible when full)
-    // assert(enchant_avail_n>=disable_left);
     int advice_avail_idx[279];
     int advice_pickup_cummul_ratio[279];
     int advice_avail_n=0;
@@ -190,11 +189,11 @@ __device__ int get_adv_idx(
                         (advice_applied_n[j]<advice_list[5][j]);
     }
     // check already picked
-    for (int j=0; j<3; j++){
-        if (already_picked[j]>=0){
-            advice_avail[already_picked[j]] = false;
-        }
-    }
+    // for (int j=0; j<3; j++){
+    //     if (already_picked[j]>=0){
+    //         advice_avail[already_picked[j]] = false;
+    //     }
+    // }
     // check chaos6 'deletion' option
     switch(adv_gauge_idx){
         case 0:
@@ -235,6 +234,13 @@ __device__ int get_adv_idx(
     if (!any_unavail){
         advice_avail[261] = false;
     }
+    // special disable advice
+    if (disable_left==0){
+        for (int j=0; j<279; j++){
+            advice_avail[j] = advice_avail[j] && (advice_list[1][j]!=6);
+        }
+    }
+
     // count available advice
     for (int j=0; j<279; j++){
         if (advice_avail[j]){

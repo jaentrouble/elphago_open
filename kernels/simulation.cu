@@ -11,7 +11,7 @@ __device__ int randint(
     int out = low + (high -low)*rand_val;
     return out;
 }
-__device__ char randint(
+__device__ char randchar(
     char low,
     char high,
     curandState* seed
@@ -111,7 +111,7 @@ __device__ void opt_updown(
 ){
     float rand_val = 1 - curand_uniform(seed);
 
-    int avail_indices[5];
+    char avail_indices[5];
     int avail_n = 0;
     for (int j=0; j<5; j++){
         if (opt_is_avail[j]){
@@ -131,64 +131,44 @@ __device__ void opt_updown(
 
     int max_avail_indices[5] = {0};
     int max_idx_idx = 0;
-    int max_idx_n = 0;
+    int max_idx=0;
     for (int j=1; j<avail_n; j++){
         if (opt[avail_indices[j]]>opt[avail_indices[max_idx_idx]]){
+            max_idx = avail_indices[j];
             max_idx_idx = j;
         }
     }
-    for (int j=0; j<avail_n; j++){
-        if (opt[avail_indices[j]]==opt[max_idx_idx]){
-            max_avail_indices[max_idx_n] = j;
-            max_idx_n += 1;
-        }
-    }
-    int max_avail_idx;
-    int max_idx;
-    int max_other_idx;
-    max_avail_idx = max_avail_indices[randint(0, max_idx_n, seed)];
-    max_idx = avail_indices[max_avail_idx];
-    max_other_idx = avail_indices[(max_avail_idx+1)%avail_n];
+    int max_other_idx = avail_indices[(max_idx_idx+1)%avail_n];
 
     // same as above, but min instead max
     int min_avail_indices[5] = {0};
     int min_idx_idx = 0;
-    int min_idx_n = 0;
+    int min_idx=0;
     for (int j=1; j<avail_n; j++){
         if (opt[avail_indices[j]]<opt[avail_indices[min_idx_idx]]){
+            min_idx = avail_indices[j];
             min_idx_idx = j;
         }
     }
-    for (int j=0; j<avail_n; j++){
-        if (opt[avail_indices[j]]==opt[min_idx_idx]){
-            min_avail_indices[min_idx_n] = j;
-            min_idx_n += 1;
-        }
-    }
-    int min_avail_idx;
-    int min_idx;
-    int min_other_idx;
-    min_avail_idx = min_avail_indices[randint(0, min_idx_n, seed)];
-    min_idx = avail_indices[min_avail_idx];
-    min_other_idx = avail_indices[(min_avail_idx+1)%avail_n];
+    int min_other_idx = avail_indices[(min_idx_idx+1)%avail_n];
 
     int random_opt_idx = avail_indices[0];
 
     switch(param1){
         case 0:
-            opt[param2] += randint(-2, 3, seed);
+            opt[param2] += randchar(-2, 3, seed);
             break;
         case 1:
-            opt[param2] += randint(-1, 3, seed);
+            opt[param2] += randchar(-1, 3, seed);
             break;
         case 4:
-            opt[param2] += randint(0, 5, seed);
+            opt[param2] += randchar(0, 5, seed);
             break;
         case 5:
-            opt[param2] += randint(2, 4, seed);
+            opt[param2] += randchar(2, 4, seed);
             break;
         case 6:
-            opt[param2] += randint(-4, 6, seed);
+            opt[param2] += randchar(-4, 6, seed);
             break;
         case 7:
             if (rand_val < 0.25){
@@ -356,16 +336,16 @@ __device__ void opt_updown(
             break;
         
         case 70:
-            opt[param2] = randint(1, 3, seed);
+            opt[param2] = randchar(1, 3, seed);
             break;
         case 71:
-            opt[param2] = randint(2, 4, seed);
+            opt[param2] = randchar(2, 4, seed);
             break;
         case 72:
-            opt[param2] = randint(3, 5, seed);
+            opt[param2] = randchar(3, 5, seed);
             break;
         case 73:
-            opt[param2] = randint(5, 7, seed);
+            opt[param2] = randchar(5, 7, seed);
             break;
     }
     for (int j=0;j<5;j++){
@@ -532,7 +512,7 @@ __device__ void opt_swap(
     int all_opt_n = 0;
     int space_count = 0;
 
-    int max_indices[5] = {0};
+    char max_indices[5] = {0};
     int max_idx = 0;
     int max_idx_n = 0;
     for (int j=1; j<5; j++){
@@ -548,7 +528,7 @@ __device__ void opt_swap(
     }
     max_idx = max_indices[randint(0, max_idx_n, seed)];
 
-    int min_indices[5] = {0};
+    char min_indices[5] = {0};
     int min_idx = 0;
     int min_idx_n = 0;
     for (int j=1; j<5; j++){
@@ -724,7 +704,7 @@ __device__ void opt_disable(
     const char param2,
     curandState* seed
 ){
-    int avail_indices[5];
+    char avail_indices[5];
     int avail_n = 0;
     for (int j=0; j<5; j++){
         if (opt_is_avail[j]){

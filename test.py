@@ -4,8 +4,11 @@ import math
 import pandas as pd
 import numpy as np
 import tqdm
+import random
 
-N=1000000
+N=10000000
+ITER = 10
+PLAYER_NAME = 'simple_6_bald_curve'
 
 advice_df = pd.read_csv('etc/elixir_list.csv')
 advice_list = cp.empty((11,279), dtype=cp.int32)
@@ -32,7 +35,7 @@ with open('kernels/player.cu','r') as f:
     for l in f.readlines():
         loaded_module += l
 player_module = cp.RawModule(code=loaded_module, )
-random_player = player_module.get_function('random_player')
+player = player_module.get_function(PLAYER_NAME)
 
 test_elixir = Elixir(N)
 advice_idx_given = cp.ones((N,3),dtype=cp.int32)
@@ -40,14 +43,13 @@ advice_idx_chosen = cp.ones((N,),dtype=cp.int32)
 current_prob_out = cp.empty((N,5),dtype=cp.float32)
 adv_gauge_chosen_idx = cp.ones((N,),dtype=cp.int8)
 param2_select = cp.ones((N,),dtype=cp.int8)
-
+result_opt_out = np.empty((ITER*N,5),dtype=np.int8)
 BLOCK_SIZE = 256
 sum_55=0
-for _ in tqdm.trange(10):
+for i in tqdm.trange(10):
     test_elixir.reset()
-    t = tqdm.tqdm(leave=False)
-    while cp.any(test_elixir.enchant_avail_n>0):
-        random_seed = cp.random.randint(0, 2**60, N, dtype='uint64')
+    for _ in tqdm.trange(16, leave=False):
+        random_seed = cp.array((random.randint(0, 2**60),),dtype='uint64')
         advice_idx_given.fill(-1)
         get_state(
             grid=(math.ceil(N/BLOCK_SIZE),),
@@ -70,13 +72,14 @@ for _ in tqdm.trange(10):
             )
         )
 
-        random_player(
+        player(
             grid=(math.ceil(N/BLOCK_SIZE),),
             block=(BLOCK_SIZE,),
             args=(
                 advice_idx_given,
                 test_elixir.opts,
                 test_elixir.opt_is_avail,
+                test_elixir.enchant_n,
                 advice_idx_chosen,
                 adv_gauge_chosen_idx,
                 param2_select,
@@ -84,6 +87,7 @@ for _ in tqdm.trange(10):
                 N
             )
         )
+        # advice_idx_chosen = cp.ones((N,),dtype=cp.int32)*224
         step(
             grid=(math.ceil(N/BLOCK_SIZE),),
             block=(BLOCK_SIZE,),
@@ -106,9 +110,5 @@ for _ in tqdm.trange(10):
                 N
             )
         )
-        t.update(1)
-    t.close()
-    test_elixir.opts.sort(axis=1)
-    best_2_opt = test_elixir.opts[:,-2:]
-    sum_55 += cp.sum(cp.logical_and(best_2_opt[:,0]==10, best_2_opt[:,1]==10))
-print(sum_55)
+    test_elixir.opts.get(out=result_opt_out[i*N:(i+1)*N])
+np.save(f'results/{PLAYER_NAME}_{ITER}_{N}.npy',result_opt_out)

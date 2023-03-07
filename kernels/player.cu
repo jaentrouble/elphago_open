@@ -39,6 +39,7 @@ extern "C"{
         const int advice_idx_input[][3],
         const char opts[][5],
         const bool opt_is_avail[][5],
+        const char enchant_n[],
         int advice_idx_output[],
         char adv_gauge_idx_output[],
         char param2_select_output[],
@@ -71,6 +72,192 @@ extern "C"{
                 }
             }
             adv_gauge_idx_output[i] = randint(0, 3, seed);
+            advice_idx_output[i] = advice_idx_input[i][adv_gauge_idx_output[i]];          
+        }
+    }
+    __global__ void simple_6_bald_curve(
+        const int advice_idx_input[][3],
+        const char opts[][5],
+        const bool opt_is_avail[][5],
+        const char enchant_n[],
+        int advice_idx_output[],
+        char adv_gauge_idx_output[],
+        char param2_select_output[],
+        const unsigned long long random_seed[],
+        const int N
+    ){
+        int i = blockIdx.x * blockDim.x + threadIdx.x;
+        if(i < N){
+            curandState s;
+            curand_init(random_seed[0]+i, 0, 0, &s);
+            curandState* seed = &s;
+
+            bool opt_is_avail_and_not_full[5];
+            check_max_opt(opts[i], opt_is_avail[i], opt_is_avail_and_not_full);
+            char avail_not_full_count = 0;
+            param2_select_output[i] = 0;
+            for (int j=0; j<5; j++){
+                if (opt_is_avail_and_not_full[j]){
+                    avail_not_full_count++;
+                    param2_select_output[i] = j;
+                    break;
+                }
+            }
+            if (avail_not_full_count==0){
+                for (int j=0; j<5; j++){
+                    if (opt_is_avail[i][j]){
+                        param2_select_output[i] = j;
+                        break;
+                    }
+                }
+            }
+            if (enchant_n[i]<=6){
+                adv_gauge_idx_output[i] = 0;
+            }
+            else if(enchant_n[i]==7){
+                adv_gauge_idx_output[i] = 1;
+            }
+            else{
+                adv_gauge_idx_output[i] = 2;
+            }
+            advice_idx_output[i] = advice_idx_input[i][adv_gauge_idx_output[i]];          
+        }
+    }
+    __global__ void simple_6_grandma_curve(
+        const int advice_idx_input[][3],
+        const char opts[][5],
+        const bool opt_is_avail[][5],
+        const char enchant_n[],
+        int advice_idx_output[],
+        char adv_gauge_idx_output[],
+        char param2_select_output[],
+        const unsigned long long random_seed[],
+        const int N
+    ){
+        int i = blockIdx.x * blockDim.x + threadIdx.x;
+        if(i < N){
+            curandState s;
+            curand_init(random_seed[0]+i, 0, 0, &s);
+            curandState* seed = &s;
+
+            bool opt_is_avail_and_not_full[5];
+            check_max_opt(opts[i], opt_is_avail[i], opt_is_avail_and_not_full);
+            char avail_not_full_count = 0;
+            param2_select_output[i] = 0;
+            for (int j=0; j<5; j++){
+                if (opt_is_avail_and_not_full[j]){
+                    avail_not_full_count++;
+                    param2_select_output[i] = j;
+                    break;
+                }
+            }
+            if (avail_not_full_count==0){
+                for (int j=0; j<5; j++){
+                    if (opt_is_avail[i][j]){
+                        param2_select_output[i] = j;
+                        break;
+                    }
+                }
+            }
+            if (enchant_n[i]<=6){
+                adv_gauge_idx_output[i] = 0;
+            }
+            else if(enchant_n[i]==7){
+                adv_gauge_idx_output[i] = 2;
+            }
+            else{
+                adv_gauge_idx_output[i] = 1;
+            }
+            advice_idx_output[i] = advice_idx_input[i][adv_gauge_idx_output[i]];          
+        }
+    }
+    __global__ void simple_6_killmonger_curve(
+        const int advice_idx_input[][3],
+        const char opts[][5],
+        const bool opt_is_avail[][5],
+        const char enchant_n[],
+        int advice_idx_output[],
+        char adv_gauge_idx_output[],
+        char param2_select_output[],
+        const unsigned long long random_seed[],
+        const int N
+    ){
+        int i = blockIdx.x * blockDim.x + threadIdx.x;
+        if(i < N){
+            curandState s;
+            curand_init(random_seed[0]+i, 0, 0, &s);
+            curandState* seed = &s;
+
+            bool opt_is_avail_and_not_full[5];
+            check_max_opt(opts[i], opt_is_avail[i], opt_is_avail_and_not_full);
+            char avail_not_full_count = 0;
+            param2_select_output[i] = 0;
+            for (int j=0; j<5; j++){
+                if (opt_is_avail_and_not_full[j]){
+                    avail_not_full_count++;
+                    param2_select_output[i] = j;
+                    break;
+                }
+            }
+            if (avail_not_full_count==0){
+                for (int j=0; j<5; j++){
+                    if (opt_is_avail[i][j]){
+                        param2_select_output[i] = j;
+                        break;
+                    }
+                }
+            }
+            if (enchant_n[i]<=6){
+                adv_gauge_idx_output[i] = 1;
+            }
+            else if(enchant_n[i]==7){
+                adv_gauge_idx_output[i] = 0;
+            }
+            else{
+                adv_gauge_idx_output[i] = 2;
+            }
+            advice_idx_output[i] = advice_idx_input[i][adv_gauge_idx_output[i]];          
+        }
+    }
+
+    __global__ void first_only(
+        const int advice_idx_input[][3],
+        const char opts[][5],
+        const bool opt_is_avail[][5],
+        const char enchant_n[],
+        int advice_idx_output[],
+        char adv_gauge_idx_output[],
+        char param2_select_output[],
+        const unsigned long long random_seed[],
+        const int N
+    ){
+        int i = blockIdx.x * blockDim.x + threadIdx.x;
+        if(i < N){
+            curandState s;
+            curand_init(random_seed[0]+i, 0, 0, &s);
+            curandState* seed = &s;
+
+            bool opt_is_avail_and_not_full[5];
+            check_max_opt(opts[i], opt_is_avail[i], opt_is_avail_and_not_full);
+            char avail_not_full_count = 0;
+            param2_select_output[i] = 0;
+            for (int j=0; j<5; j++){
+                if (opt_is_avail_and_not_full[j]){
+                    avail_not_full_count++;
+                    param2_select_output[i] = j;
+                    break;
+                }
+            }
+            if (avail_not_full_count==0){
+                for (int j=0; j<5; j++){
+                    if (opt_is_avail[i][j]){
+                        param2_select_output[i] = j;
+                        break;
+                    }
+                }
+            }
+
+            adv_gauge_idx_output[i] = 0;
             advice_idx_output[i] = advice_idx_input[i][adv_gauge_idx_output[i]];          
         }
     }
